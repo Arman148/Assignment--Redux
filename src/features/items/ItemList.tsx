@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchItems, selectItems, selectItemsStatus } from './itemSlice';
+import { fetchItems, addItem, updateItem, deleteItem, selectItems, selectItemsStatus, Item } from './itemSlice'; 
 import { AppDispatch } from '../../store/store';
 
 export function ItemList() {
-  
+  const [newTitle, setNewTitle] = useState('');
+  const [editId, setEditId] = useState<number | null>(null); 
+  const [editTitle, setEditTitle] = useState('');
   const items = useSelector(selectItems);
   const status = useSelector(selectItemsStatus);
   const dispatch = useDispatch<AppDispatch>();
@@ -15,8 +17,43 @@ export function ItemList() {
     }
   }, [status, dispatch]);
 
+  const handleAddItem = () => {
+    if (newTitle) {
+      dispatch(addItem({ id: items.length + 1, title: newTitle }));
+      setNewTitle('');
+    }
+  };
+
+  const handleEditItem = (item: Item) => { 
+    setEditId(item.id);
+    setEditTitle(item.title);
+  };
+
+  const handleSaveEdit = (id: number) => { 
+    if (editTitle) {
+      dispatch(updateItem({ id, title: editTitle }));
+      setEditId(null);
+    }
+  };
+
+  const handleDeleteItem = (id: number) => { 
+    dispatch(deleteItem(id));
+  };
+
   return (
     <div className="container mx-auto mt-5">
+      <div className="mb-4">
+        <input
+          type="text"
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          className="shadow appearance-none border rounded py-2 px-3 text-grey-darker"
+          placeholder="Enter new item title"
+        />
+        <button onClick={handleAddItem} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">
+          Add Item
+        </button>
+      </div>
       {status === 'loading' ? (
         <p>Loading...</p>
       ) : (
@@ -33,10 +70,31 @@ export function ItemList() {
               {items.map(item => (
                 <tr key={item.id}>
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.id}</td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.title}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                    {editId === item.id ? (
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="shadow appearance-none border rounded py-2 px-3 text-grey-darker"
+                      />
+                    ) : (
+                      item.title
+                    )}
+                  </td>
                   <td className="px-4 py-2 whitespace-nowrap text-sm font-medium">
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">Edit</button>
-                    <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 ml-2 rounded focus:outline-none focus:shadow-outline">Delete</button>
+                    {editId === item.id ? (
+                      <button onClick={() => handleSaveEdit(item.id)} className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">
+                        Save
+                      </button>
+                    ) : (
+                      <button onClick={() => handleEditItem(item)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+                        Edit
+                      </button>
+                    )}
+                    <button onClick={() => handleDeleteItem(item.id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 ml-2 rounded">
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -48,37 +106,3 @@ export function ItemList() {
   );
 }
 
-
-
-
-/*
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchItems, selectItems, selectItemsStatus } from './itemSlice';
-import { AppDispatch } from '../../store/store';
-
-export function ItemList() {
-  const items = useSelector(selectItems);
-  const status = useSelector(selectItemsStatus);
-  const dispatch = useDispatch<AppDispatch>();
-
-  useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchItems());
-    }
-  }, [status, dispatch]);
-
-  return (
-    <div>
-      {status === 'loading' ? (
-        <p>Loading...</p>
-      ) : (
-        items.map(item => (
-          <div key={item.id}>{item.title}</div>
-        ))
-      )}
-    </div>
-  );
-}
-
-*/
