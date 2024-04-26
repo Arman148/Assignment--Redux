@@ -1,3 +1,7 @@
+to run the project run these commands in the terminal: npm install, then npm run build
+
+project was done in 2 hours 30 minutes
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
