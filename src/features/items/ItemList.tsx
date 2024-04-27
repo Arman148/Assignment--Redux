@@ -4,19 +4,26 @@ import { fetchItems, addItem, updateItem, deleteItem, selectItems, selectItemsSt
 import { AppDispatch } from '../../store/store';
 
 export function ItemList() {
+  // State variables for managing new item title, editing id and editing title
   const [newTitle, setNewTitle] = useState('');
   const [editId, setEditId] = useState<number | null>(null); 
   const [editTitle, setEditTitle] = useState('');
+
+  // Selecting items and status from Redux store
   const items = useSelector(selectItems);
   const status = useSelector(selectItemsStatus);
-  const dispatch = useDispatch<AppDispatch>();
+  
+  const dispatch = useDispatch<AppDispatch>(); // Dispatch function for Redux actions
 
+
+  // fetch items when status is 'idle'
   useEffect(() => {
     if (status === 'idle') {
       dispatch(fetchItems());
     }
   }, [status, dispatch]);
 
+  // handle adding a new item
   const handleAddItem = () => {
     if (newTitle) {
       dispatch(addItem({ id: items.length + 1, title: newTitle }));
@@ -24,11 +31,13 @@ export function ItemList() {
     }
   };
 
+  // handle editing an item
   const handleEditItem = (item: Item) => { 
     setEditId(item.id);
     setEditTitle(item.title);
   };
 
+  // handle saving edited item
   const handleSaveEdit = (id: number) => { 
     if (editTitle) {
       dispatch(updateItem({ id, title: editTitle }));
@@ -36,6 +45,7 @@ export function ItemList() {
     }
   };
 
+  // handle deleting an item
   const handleDeleteItem = (id: number) => { 
     dispatch(deleteItem(id));
   };
